@@ -25,6 +25,7 @@ fetch_and_configure() {
 		tee -a < "${script_dir}/config" custom.config 1>&2
 		make allnoconfig KCONFIG_ALLCONFIG=custom.config 1>&2
 		virtme-configkernel --update 1>&2
+		make localmodconfig LSMOD="$(mktemp)" 1>&2
 	fi
 
 	echo "${src_dir}"
@@ -39,7 +40,7 @@ for kernel_version in "${kernel_versions[@]}"; do
 	else
 		cd "$(fetch_and_configure "$kernel_version")"
 		make clean
-		make -j7 bzImage
+		make -j7 bzImage modules
 
 		cp "arch/x86/boot/bzImage" "${script_dir}/linux-${kernel_version}.bz"
 		if [ "$kernel_version" != "$series" ]; then
